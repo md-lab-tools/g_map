@@ -10,7 +10,7 @@ add_definitions(${GROMACS_DEFINITIONS})
 message(${GROMACS_INCLUDE_DIRS})
 include_directories(${GROMACS_INCLUDE_DIRS})
 
-set(SOURCE_FILES src/g_map.cpp)
+set(SOURCE_FILES src/g_map.cpp src/g_map.h)
 
 include_directories(src)
 
