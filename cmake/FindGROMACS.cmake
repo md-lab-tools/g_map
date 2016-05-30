@@ -1,75 +1,75 @@
+# - Finds parts of gromacs
+# Find the native gromacs compents headers and libraries.
 #
-# This file is part of the GROMACS molecular simulation package.
+#  GROMACS_INCLUDE_DIRS - where to find gromacs headers.
+#  GROMACS_LIBRARIES    - List of libraries when used by gromacs.
+#  GROMACS_FOUND        - True if all gromacs componets were found.
+#  GROMACS_DEFINITIONS  - Extra definies needed by gromacs
+#  GROMACS_VERSION      - Gromacs lib interface version
 #
-# Copyright (c) 2014, by the GROMACS development team, led by
-# Mark Abraham, David van der Spoel, Berk Hess, and Erik Lindahl,
-# and including many others, as listed in the AUTHORS file in the
-# top-level source directory and at http://www.gromacs.org.
+# Copyright 2009-2015 The VOTCA Development Team (http://www.votca.org)
 #
-# GROMACS is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation; either version 2.1
-# of the License, or (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# GROMACS is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU Lesser General Public
-# License along with GROMACS; if not, see
-# http://www.gnu.org/licenses, or write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
-# If you want to redistribute modifications to GROMACS, please
-# consider that scientific software is very special. Version
-# control is crucial - bugs must be traceable. We will be happy to
-# consider code for inclusion in the official distribution, but
-# derived work must not be called official GROMACS. Details are found
-# in the README & COPYING files - if they are missing, get the
-# official version at http://www.gromacs.org.
-#
-# To help us fund GROMACS development, we humbly ask that you cite
-# the research papers on the package. Check out http://www.gromacs.org.
 
-# This file should remain version-agnostic, with all things specific to a
-# particular GROMACS version remaining in the package configuration files.
-# This find module only provides some convenience functionality to manage the
-# suffixes etc.
-# That should allow using the same FindGROMACS.cmake file with multiple
-# different GROMACS installations on the same machine.
+find_package(PkgConfig)
+pkg_check_modules(PC_GROMACS_D libgromacs_d)
+pkg_check_modules(PC_GROMACS libgromacs)
 
-# Propagate all flags passed to parent find_package() to the config call below.
-set(_gmx_find_args "")
-if (GROMACS_FIND_VERSION)
-    if (GROMACS_FIND_VERSION VERSION_LESS "5.1")
-        message(FATAL_ERROR
-            "This version of FindGROMACS.cmake requires GROMACS-provided "
-            "package configuration files, and only works to find "
-            "GROMACS 5.1 or later.")
-    endif()
-    list(APPEND _gmx_find_args ${GROMACS_FIND_VERSION})
-    if (GROMACS_FIND_VERSION_EXACT)
-        list(APPEND _gmx_find_args EXACT)
-    endif()
-endif()
-if (GROMACS_FIND_REQUIRED)
-    list(APPEND _gmx_find_args REQUIRED)
-endif()
-if (GROMACS_FIND_QUIETLY)
-    list(APPEND _gmx_find_args QUIET)
-endif()
+find_library(GROMACS_LIBRARY NAMES gromacs_d gromacs HINTS ${PC_GROMACS_D_LIBRARY_DIRS} ${PC_GROMACS_LIBRARY_DIRS})
+if (GROMACS_LIBRARY)
+  include(CheckLibraryExists)
+  include(CheckCXXLibraryExists)
+  check_library_exists("${GROMACS_LIBRARY}" GromacsVersion "" FOUND_GROMACS_VERSION)
+  if(NOT FOUND_GROMACS_VERSION)
+    check_cxx_library_exists("${GROMACS_LIBRARY}" gmx_version "" FOUND_GROMACS_VERSION_CXX)
+  endif()
+  if(NOT FOUND_GROMACS_VERSION AND NOT FOUND_GROMACS_VERSION_CXX)
+    message(FATAL_ERROR "Could not find GromacsVersion in ${GROMACS_LIBRARY}, take look at the error message in ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log to find out what was going wrong. If you don't have pkg-config installed you will most likely have to set GROMACS_LIBRARY by hand which sets the gromacs lib and it's dependencies (i.e. -DGROMACS_LIBRARY='/path/to/libgmx.so;/path/to/libblas.so;/path/to/libm.so')!")
+  endif()
+  check_library_exists("${GROMACS_LIBRARY}" init_domdec_vsites "" FOUND_GROMACS_INIT_DOMDEC_VSITES)
+  check_library_exists("${GROMACS_LIBRARY}" gmx_gpu_sharing_supported "" FOUND_GROMACS_GMX_GPU_SHARING_SUPPORTED)
+  #check is above
+  if(FOUND_GROMACS_VERSION_CXX)
+    set(GROMACS_VERSION 52)
+  elseif(FOUND_GROMACS_GMX_GPU_SHARING_SUPPORTED)
+    set(GROMACS_VERSION 51)
+  elseif(FOUND_GROMACS_INIT_DOMDEC_VSITES)
+    set(GROMACS_VERSION 50)
+  else()
+    message(FATAL_ERROR "Could not find gmx_version, init_domdec_vsites nor gmx_gpu_sharing_supported in the gromacs library, take look at the error message in ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log to find out what was going wrong. This most likely means that your gromacs version is too old, we need at least gromacs 5 !") 
+  endif()
+  check_cxx_library_exists("${GROMACS_LIBRARY}" gmx_is_single_precision "" FOUND_GMX_IS_SINGLE_PRECISION)
+  check_cxx_library_exists("${GROMACS_LIBRARY}" gmx_is_double_precision "" FOUND_GMX_IS_DOUBLE_PRECISION)
+  if(FOUND_GMX_IS_DOUBLE_PRECISION AND GROMACS_VERSION GREATER 51)
+    set(GROMACS_DEFINITIONS "-DGMX_DOUBLE=1")
+  elseif(FOUND_GMX_IS_SINGLE_PRECISION AND GROMACS_VERSION GREATER 51)
+    set(GROMACS_DEFINITIONS "-DGMX_DOUBLE=0")
+  elseif(FOUND_GMX_IS_DOUBLE_PRECISION)
+    set(GROMACS_DEFINITIONS "-DGMX_DOUBLE")
+  elseif(NOT FOUND_GMX_IS_SINGLE_PRECISION)
+    message(FATAL_ERROR "Could not find neither gmx_is_single_precision nor gmx_is_double_precision in the gromacs library, that is very very strange, take look at the error message in ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log to find out what was going wrong. This most likely means that your gromacs version is too old, we need at least gromacs 5 !") 
+  endif()
+endif (GROMACS_LIBRARY)
 
-# Determine the actual name of the package configuration files.
-set(_gmx_pkg_name gromacs)
-if (DEFINED GROMACS_SUFFIX)
-    set(_gmx_pkg_name gromacs${GROMACS_SUFFIX})
-endif()
-# Delegate all the actual work to the package configuration files.
-# The CONFIGS option is not really necessary, but provides a bit better error
-# messages, since we actually know what the config file should be called.
-find_package(GROMACS ${_gmx_find_args} CONFIG
-             NAMES ${_gmx_pkg_name}
-             CONFIGS ${_gmx_pkg_name}-config.cmake)
-unset(_gmx_find_args)
-unset(_gmx_pkg_name)
+find_path(GROMACS_INCLUDE_DIR gromacs/fileio/tpxio.h HINTS ${PC_GROMACS_D_INCLUDE_DIRS} ${PC_GROMACS_INCLUDE_DIRS})
+
+set(GROMACS_LIBRARIES "${GROMACS_LIBRARY}" )
+set(GROMACS_INCLUDE_DIRS "${GROMACS_INCLUDE_DIR}" )
+
+include(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set GROMACS_FOUND to TRUE
+# if all listed variables are TRUE
+find_package_handle_standard_args(GROMACS DEFAULT_MSG GROMACS_LIBRARY GROMACS_INCLUDE_DIR GROMACS_VERSION)
+
+mark_as_advanced(GROMACS_LIBRARY GROMACS_INCLUDE_DIR GROMACS_VERSION)

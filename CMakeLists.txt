@@ -8,6 +8,7 @@ find_package(GROMACS 5.1 REQUIRED)
 
 add_definitions(${GROMACS_DEFINITIONS})
 message(${GROMACS_INCLUDE_DIRS})
+message(${GROMACS_LIBRARIES})
 include_directories(${GROMACS_INCLUDE_DIRS})
 
 set(SOURCE_FILES src/g_map.cpp src/g_map.h)
