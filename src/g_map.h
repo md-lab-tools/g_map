@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "gromacs/trajectoryanalysis.h"
-#include <gromacs/options/ioptionscontainer.h>
 #include "gromacs/utility/smalloc.h"
 #include "gromacs/fileio/tpxio.h"
 #include "gromacs/pbcutil/rmpbc.h"
