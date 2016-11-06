@@ -146,28 +146,19 @@ adjecent, and should be made a whole through rPBC procedue.
  * @param bMapName
  */
 void map_res(mapping_rule *map_r, t_atoms *atoms, rvec x[], int head, t_symtab *symtab, bool bGeo, bool bMapName) {
-  int i, j, k, l, n, m, nres, natom, flag_over;  //-geo should be added
-
-  n = -1;
-  flag_over = 0;
   rvec xcom[CG_PART_TYPE];
-  real mtot;
+  //paticle type number of specified residue
+  int nres = resnm_to_resnr(map_r, *atoms->resinfo[atoms->atom[head].resind].name);
 
-  nres =
-      resnm_to_resnr(map_r, *atoms->resinfo[atoms->atom[head].resind].name);//paticle type number of specified residue
-
-  for (j = 0; j < map_r->cg_particle_num[nres]; j++) {
+  for (int j = 0; j < map_r->cg_particle_num[nres]; j++) {
     clear_rvec(xcom[j]);
-    mtot = 0;
-    for (k = 0; k < map_r->atom_num_each_particle[nres][j]; k++) {
-      n = find_part_name_forward(map_r, atoms, head, map_r->atom_name_each_particle[nres][j][k]);
-
-      if (bGeo) {
+    real mtot = 0.0;
+    for (int k = 0; k < map_r->atom_num_each_particle[nres][j]; k++) {
+      int n = find_part_name_forward(atoms, head, map_r->atom_name_each_particle[nres][j][k]);
+      int m = atoms->atom[n].m;
+      if (bGeo)
         m = 1;
-      } else {
-        m = atoms->atom[n].m;
-      }
-      for (l = 0; l < DIM; l++)
+      for (int l = 0; l < DIM; l++)
         xcom[j][l] += m * x[n][l];
       mtot += m;
     }
@@ -190,17 +181,14 @@ void map_res(mapping_rule *map_r, t_atoms *atoms, rvec x[], int head, t_symtab *
  */
 void proc_res_name(mapping_rule *map_r, t_atoms *atoms, int isize, int index[]) {
   static t_symtab *symtab = NULL;
-  int ai, i, j, resnum;
-
+  printf("Number of atoms: %d\n",isize);
   snew(symtab, 1);
   open_symtab(symtab);
 
-  for (i = 0; i < map_r->cg_res_num; i++) {
-    for (j = 0; j < map_r->cg_num[i]; j++) {
-
+  for (int i = 0; i < map_r->cg_res_num; i++) {
+    for (int j = 0; j < map_r->cg_num[i]; j++) {
       atoms->resinfo[map_r->residue_num[i][j] - 1].
           name = put_symtab(symtab, map_r->cg_name[i]);
-
     }
   }
 }
@@ -214,12 +202,11 @@ void proc_res_name(mapping_rule *map_r, t_atoms *atoms, int isize, int index[]) 
  * @param index_head
  */
 void get_head(t_atoms *atoms, int isize, int index[], int *ih, int index_head[]) {
-  int i, ia, current;
   index_head[0] = index[0];
-  *ih = 1;//number of the head index
-  current = 0;//current position
-  for (i = 1; i < isize; i++) {
-    ia = index[i];
+  *ih = 1;  //number of the head index
+  int current = 0;  //current position
+  for (int i = 1; i < isize; i++) {
+    int ia = index[i];
     if (atoms->atom[ia].resind != current) {
       *ih = *ih + 1;
       index_head[*ih - 1] = ia;
@@ -235,12 +222,11 @@ void get_head(t_atoms *atoms, int isize, int index[], int *ih, int index_head[])
  * @return
  */
 int resnm_to_resnr(mapping_rule *map_r, char res[]) {
-  int i;
-  for (i = 0; i < map_r->cg_res_num; i++) {
+  for (int i = 0; i < map_r->cg_res_num; i++) {
     if (strcmp(map_r->cg_name[i], res) == 0)
       return i;
   }
-  printf("no proper particle nr, check your rule file!");
+  printf("resnm_to_resnr: no proper particle nr, check your rule file!");
   exit(0);
 }
 
@@ -254,10 +240,9 @@ int resnm_to_resnr(mapping_rule *map_r, char res[]) {
  * @param index_output
  */
 void make_output_index(mapping_rule *map_r, t_atoms *atoms, int ih, int index_head[], int *io, int index_output[]) {
-  int head;
   *io = 0;
   for (int i = 0; i < ih; i++) {
-    head = index_head[i];
+    int head = index_head[i];
     int t = resnm_to_resnr(map_r, *atoms->resinfo[atoms->atom[head].resind].name);
     int m = map_r->cg_particle_num[t];
     for (int j = 0; j < m; j++) {
@@ -276,14 +261,16 @@ void make_output_index(mapping_rule *map_r, t_atoms *atoms, int ih, int index_he
  * @param atomnm
  * @return
  */
-int find_part_name_forward(mapping_rule *map_r, t_atoms *atoms, int from, char atomnm[]) {
-
+int find_part_name_forward(t_atoms *atoms, int from, char atomnm[]) {
   for (int i = from; i < atoms->nr; i++) {
     if (strcmp(*atoms->atomname[i], atomnm) == 0) {
+      printf("from: %d i: %d\n", from, i);
       return i;
     }
   }
-  printf("%s no such atom name, please check your rule file!", atomnm);
+
+  printf("%s no such atom name, please check your rule file!\n", atomnm);
+  printf("from: %d\n", from);
   exit(0);
 }
 
@@ -414,7 +401,6 @@ int main(int argc, char *argv[]) {
                          box,
                          isize_output,
                          index_output);//need to be changed into new
-
   view_all(oenv, NFILE, fnm);
   return 0;
 }

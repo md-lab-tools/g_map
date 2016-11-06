@@ -75,5 +75,5 @@ void get_head(t_atoms *atoms, int isize, int index[], int *ih, int index_head[])
 void make_output_index(mapping_rule *map_r, t_atoms *atoms,
                        int ih, int index_head[],
                        int *io, int index_output[]);
-int find_part_name_forward(mapping_rule *map_r, t_atoms *atoms, int from, char atomnm[]);
+int find_part_name_forward(t_atoms *atoms, int from, char atomnm[]);
 #endif //G_MAP_G_MAP_H
