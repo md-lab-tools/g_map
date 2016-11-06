@@ -12,11 +12,15 @@ message(${GROMACS_LIBRARIES})
 include_directories(${GROMACS_INCLUDE_DIRS})
 
 set(SOURCE_FILES src/g_map.cpp src/g_map.h)
+set(SOURCE_FILES_MSD src/gmx_msd.cpp)
 
 include_directories(src)
 
 add_executable(g_map ${SOURCE_FILES})
+add_executable(gmx_msd ${SOURCE_FILES_MSD})
+target_link_libraries(gmx_msd ${GROMACS_LIBRARIES})
 target_link_libraries(g_map ${GROMACS_LIBRARIES})
+
 install(FILES CMakeLists.txt.g_map
         DESTINATION ${DATA_INSTALL_DIR}/g_map
         RENAME CMakeLists.txt
