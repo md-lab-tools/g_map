@@ -21,6 +21,7 @@
 #define G_MAP_G_MAP_H
 
 #include <string>
+#include <cstring>
 #include <vector>
 
 #include "gromacs/trajectoryanalysis.h"
@@ -37,11 +38,8 @@
 #include "gromacs/utility/cstringutil.h"
 #include "gromacs/utility/fatalerror.h"
 #include "gromacs/topology/mtop_util.h"
-#include <cstring>
 #include <iostream>
 #include <gromacs/fileio/trxio.h>
-
-//using namespace gmx;
 
 #define CG_TYPE 10
 #define CG_PART_TYPE 20

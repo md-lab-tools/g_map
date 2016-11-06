@@ -16,7 +16,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h>
 #include "g_map.h"
 
 #define NFILE asize(fnm)
@@ -28,7 +27,6 @@
  * @param map_r
  */
 void load_outer_rule(std::string fn, mapping_rule *map_r) {
-  std::cout << "begin load_outer_rule" << std::endl;
   FILE *fp;
   int i, j;
   char temp[256];
@@ -47,7 +45,6 @@ void load_outer_rule(std::string fn, mapping_rule *map_r) {
     }
   }
   fclose(fp);
-  std::cout << "end load_outer_rule" << std::endl;
 }
 
 /**
@@ -56,7 +53,6 @@ void load_outer_rule(std::string fn, mapping_rule *map_r) {
  * @param map_r
  */
 void load_inner_rule(std::string fn, mapping_rule *map_r) {
-  std::cout << "begin load_inner_rule" << std::endl;
   FILE *fp;
   int i, j, k;
   char temp[256];
@@ -91,7 +87,6 @@ void load_inner_rule(std::string fn, mapping_rule *map_r) {
       }
     }
   }
-  std::cout << "end load_inner_rule" << std::endl;
 }
 
 /**
@@ -194,7 +189,6 @@ void map_res(mapping_rule *map_r, t_atoms *atoms, rvec x[], int head, t_symtab *
  * @param index
  */
 void proc_res_name(mapping_rule *map_r, t_atoms *atoms, int isize, int index[]) {
-  std::cout << "begin proc_res_name" << std::endl;
   static t_symtab *symtab = NULL;
   int ai, i, j, resnum;
 
@@ -209,7 +203,6 @@ void proc_res_name(mapping_rule *map_r, t_atoms *atoms, int isize, int index[]) 
 
     }
   }
-  std::cout << "end proc_res_name" << std::endl;
 }
 
 /**
@@ -221,7 +214,6 @@ void proc_res_name(mapping_rule *map_r, t_atoms *atoms, int isize, int index[]) 
  * @param index_head
  */
 void get_head(t_atoms *atoms, int isize, int index[], int *ih, int index_head[]) {
-  std::cout << "start get_head" << std::endl;
   int i, ia, current;
   index_head[0] = index[0];
   *ih = 1;//number of the head index
@@ -234,7 +226,6 @@ void get_head(t_atoms *atoms, int isize, int index[], int *ih, int index_head[])
       current = atoms->atom[ia].resind;
     }
   }
-  std::cout << "end get_head" << std::endl;
 }
 
 /**
@@ -286,13 +277,13 @@ void make_output_index(mapping_rule *map_r, t_atoms *atoms, int ih, int index_he
  * @return
  */
 int find_part_name_forward(mapping_rule *map_r, t_atoms *atoms, int from, char atomnm[]) {
-  int i;
-  for (i = from; i < from + atoms->nr; i++) {
+
+  for (int i = from; i < atoms->nr; i++) {
     if (strcmp(*atoms->atomname[i], atomnm) == 0) {
       return i;
     }
   }
-  printf("no such atom name, please check your rule file!");
+  printf("%s no such atom name, please check your rule file!", atomnm);
   exit(0);
 }
 
@@ -316,8 +307,6 @@ int main(int argc, char *argv[]) {
   static int n = 1;
   static bool bGeo = FALSE;
   int ngrps = 1;
-  t_topology top;
-  int ePBC;
   char title[STRLEN];
   t_trxframe fr;
   rvec *xtop;
@@ -348,8 +337,18 @@ int main(int argc, char *argv[]) {
   };
 
 
-
-  if (!parse_common_args(&argc, argv, PCA_CAN_TIME | PCA_CAN_VIEW, NFILE, fnm, asize(pa), pa, asize(desc), (const char **) desc, 0, NULL, &oenv)) {
+  if (!parse_common_args(&argc,
+                         argv,
+                         PCA_CAN_TIME | PCA_CAN_VIEW,
+                         NFILE,
+                         fnm,
+                         asize(pa),
+                         pa,
+                         asize(desc),
+                         (const char **) desc,
+                         0,
+                         NULL,
+                         &oenv)) {
     return 0;
   }
 
@@ -358,7 +357,10 @@ int main(int argc, char *argv[]) {
 
   const char *infile_tps = ftp2fn_null(efTPS, NFILE, fnm);
   const char *infile_index = ftp2fn_null(efNDX, NFILE, fnm);
-  bool bTop = (bool) read_tps_conf(infile_tps, &top, &ePBC, &xtop, NULL, box, TRUE);
+
+  int ePBC;
+  t_topology top;
+  bool bTop = (bool) read_tps_conf(infile_tps, &top, &ePBC, &xtop, NULL, box, FALSE);
 
   if (!bTop) {
     gmx_fatal(FARGS, "Could not read topology file from %s", ftp2fn(efTPS, NFILE, fnm));
@@ -385,7 +387,6 @@ int main(int argc, char *argv[]) {
   make_output_index(&map_r, &top.atoms, isize_head, index_head, &isize_output, index_output);
 
   std::cout << "Loading rule file finished!" << std::endl;
-
 
   do {
     /* coordinates are available in the vector fr.x

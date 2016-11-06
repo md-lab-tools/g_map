@@ -4,7 +4,7 @@ project(g_map)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-find_package(GROMACS 5.1 REQUIRED)
+find_package(GROMACS 2016.1 REQUIRED)
 
 add_definitions(${GROMACS_DEFINITIONS})
 message(${GROMACS_INCLUDE_DIRS})
@@ -12,13 +12,10 @@ message(${GROMACS_LIBRARIES})
 include_directories(${GROMACS_INCLUDE_DIRS})
 
 set(SOURCE_FILES src/g_map.cpp src/g_map.h)
-set(SOURCE_FILES_MSD src/gmx_msd.cpp)
 
 include_directories(src)
 
 add_executable(g_map ${SOURCE_FILES})
-add_executable(gmx_msd ${SOURCE_FILES_MSD})
-target_link_libraries(gmx_msd ${GROMACS_LIBRARIES})
 target_link_libraries(g_map ${GROMACS_LIBRARIES})
 
 install(FILES CMakeLists.txt.g_map
