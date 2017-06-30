@@ -1,0 +1,25 @@
+; input_topol: sim0topol_aa_0.0005_367.top
+; conf: sim0confout_final_aa_0.0005_367.gro
+; clean: True
+; remove_cross: True
+;#include "/apps/leuven/thinking/2014a/software/GROMACS/5.0.4-intel-2014a-hybrid/share/gromacs/top/oplsaa.ff/forcefield.itp"
+;#include "/usr/share/gromacs/top/oplsaa.ff/forcefield.itp"
+#include "/home/teodor/.local/gromacs/share/gromacs/top/oplsaa.ff/forcefield.itp"
+
+[ moleculetype ]
+HYB 3
+
+
+[ atoms ]
+1 opls_136 1 N2T C6 1 -0.295833333333 12.011
+2 opls_267 1 N2T C7 2 0.654166666667 12.011
+3 opls_140 1 N2T H3 3 0.262166666667 1.008
+4 opls_140 1 N2T H4 4 0.262166666667 1.008
+
+[ system ]
+None
+
+[ molecules ]
+HYB 1
+
+
