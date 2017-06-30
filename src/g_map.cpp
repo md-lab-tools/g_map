@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015,2016
+  Copyright (C) 2015-2017
       Zidan Zhang, Jakub Krajniak
 
   This is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 */
 
 #include "g_map.h"
+#include <sstream>
 
 #define NFILE asize(fnm)
 
@@ -264,13 +265,11 @@ void make_output_index(mapping_rule *map_r, t_atoms *atoms, int ih, int index_he
 int find_part_name_forward(t_atoms *atoms, int from, char atomnm[]) {
   for (int i = from; i < atoms->nr; i++) {
     if (strcmp(*atoms->atomname[i], atomnm) == 0) {
-      printf("from: %d i: %d\n", from, i);
       return i;
     }
   }
 
   printf("%s no such atom name, please check your rule file!\n", atomnm);
-  printf("from: %d\n", from);
   exit(0);
 }
 
@@ -280,15 +279,7 @@ int find_part_name_forward(t_atoms *atoms, int from, char atomnm[]) {
  */
 int main(int argc, char *argv[]) {
   static char *desc[] = {
-      "this is a small test program meant to serve as a template ",
-      "when writing your own analysis tools. The advantage of ",
-      "using gromacs for this is that you have access to all ",
-      "information in the topology, and your program will be ",
-      "able to handle all types of coordinates and trajectory ",
-      "files supported by gromacs. Go ahead and try it! ",
-      "This test version just writes the coordinates of an ",
-      "arbitrary atom to standard out for each frame. You can ",
-      "select which atom you want to examine with the -n argument."
+
   };
 
   static int n = 1;
@@ -374,6 +365,7 @@ int main(int argc, char *argv[]) {
   make_output_index(&map_r, &top.atoms, isize_head, index_head, &isize_output, index_output);
 
   std::cout << "Loading rule file finished!" << std::endl;
+  std::cout << "Processing trajectory" << std::endl;
 
   do {
     /* coordinates are available in the vector fr.x
@@ -386,14 +378,15 @@ int main(int argc, char *argv[]) {
 
   } while (read_next_frame(oenv, status, &fr));
 
-  close_trj(status);
+  //close_trj(status);
 
   map_conf(&map_r, &top.atoms, xtop, isize_head, index_head, bGeo);
 
-  printf("%s\n", title);
+  std::stringstream ss;
+  ss << "Input: " << infile_tps;
 
   write_sto_conf_indexed(ftp2fn(efSTO, NFILE, fnm),
-                         title,
+                         ss.str().c_str(),
                          &top.atoms,
                          (rvec const *) xtop,
                          NULL,

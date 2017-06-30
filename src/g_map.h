@@ -41,7 +41,7 @@
 #include <iostream>
 #include <gromacs/fileio/trxio.h>
 
-#define CG_TYPE 10
+#define CG_TYPE 20
 #define CG_PART_TYPE 20
 #define AA_RES_NUM 9999
 #define AA_PART_NUM 999
