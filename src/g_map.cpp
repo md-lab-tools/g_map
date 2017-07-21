@@ -17,6 +17,7 @@
 */
 
 #include "g_map.h"
+#include <gromacs/utility/init.h>
 #include <sstream>
 
 #define NFILE asize(fnm)
@@ -278,6 +279,7 @@ int find_part_name_forward(t_atoms *atoms, int from, char atomnm[]) {
  * The main function for the analysis template.
  */
 int main(int argc, char *argv[]) {
+  gmx::init(&argc, &argv);
   static char *desc[] = {
 
   };
@@ -314,7 +316,6 @@ int main(int argc, char *argv[]) {
       {efDAT, "-ir", "inner", ffREAD},
   };
 
-
   if (!parse_common_args(&argc,
                          argv,
                          PCA_CAN_TIME | PCA_CAN_VIEW,
@@ -327,6 +328,7 @@ int main(int argc, char *argv[]) {
                          0,
                          NULL,
                          &oenv)) {
+    gmx::finalize();
     return 0;
   }
 
@@ -395,5 +397,6 @@ int main(int argc, char *argv[]) {
                          isize_output,
                          index_output);//need to be changed into new
   view_all(oenv, NFILE, fnm);
+  gmx::finalize();
   return 0;
 }
