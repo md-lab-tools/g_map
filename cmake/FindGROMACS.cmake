@@ -25,6 +25,7 @@
 find_package(PkgConfig)
 pkg_check_modules(PC_GROMACS_D libgromacs_d)
 pkg_check_modules(PC_GROMACS libgromacs)
+pkg_check_modules(PC_GROMACS libgromacs_mpi)
 
 find_library(GROMACS_LIBRARY NAMES gromacs_d gromacs HINTS ${PC_GROMACS_D_LIBRARY_DIRS} ${PC_GROMACS_LIBRARY_DIRS})
 if (GROMACS_LIBRARY)
