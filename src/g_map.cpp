@@ -59,16 +59,11 @@ void load_inner_rule(std::string fn, mapping_rule *map_r) {
   int i, j, k;
   char temp[256];
   fp = fopen(fn.c_str(), "r");
-
   fgets(temp, 100, fp);
-
   strcpy(map_r->comment[1], temp);
-
   fgets(temp, 100, fp);
-
   int temp_num;
   sscanf(temp, "%d", &temp_num);
-
   if (temp_num != map_r->cg_res_num) {
     printf("Check your rule file! The residue number is not equal\n");
     exit(0);
@@ -313,7 +308,7 @@ int main(int argc, char *argv[]) {
       {efTRX, "-o", "trajout", ffWRITE},        /* this is the output topology */
       {efSTO, "-c", "confout", ffWRITE},        /* this is the output trajectory */
       {efDAT, "-or", "outer", ffREAD},
-      {efDAT, "-ir", "inner", ffREAD},
+      //{efDAT, "-ir", "inner", ffREAD},
   };
 
   if (!parse_common_args(&argc,
@@ -360,7 +355,7 @@ int main(int argc, char *argv[]) {
   mapping_rule map_r;
 
   load_outer_rule(opt2fn("-or", NFILE, fnm), &map_r);    /*load the outer mapping rule*/
-  load_inner_rule(opt2fn("-ir", NFILE, fnm), &map_r);    /*load the inner mapping rule*/
+  //load_inner_rule(opt2fn("-ir", NFILE, fnm), &map_r);    /*load the inner mapping rule*/
 
   proc_res_name(&map_r, &top.atoms, isize_old, index_old);
   get_head(&top.atoms, isize_old, index_old, &isize_head, index_head);
